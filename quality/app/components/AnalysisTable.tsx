@@ -77,7 +77,7 @@ function formatNumber(n: number | undefined): string {
 /* ═══════════════════════════════════════════
    Component
    ═══════════════════════════════════════════ */
-export default function AnalysisTable({ type }: { type: TableType }) {
+export default function AnalysisTable({ type, db }: { type: TableType; db: string }) {
   const [meta, setMeta] = useState<Meta | null>(null);
   const [monthGroups, setMonthGroups] = useState<MonthGroup[]>([]);
   const [expandedMonths, setExpandedMonths] = useState<Set<string>>(new Set());
@@ -94,7 +94,7 @@ export default function AnalysisTable({ type }: { type: TableType }) {
 
   // ── Fetch meta ──
   useEffect(() => {
-    fetch("/api/pdp-analysis?type=meta")
+    fetch(`/api/pdp-analysis?type=meta&db=${encodeURIComponent(db)}`)
       .then((r) => r.json())
       .then((data: Meta) => {
         setMeta(data);
@@ -120,7 +120,7 @@ export default function AnalysisTable({ type }: { type: TableType }) {
 
       setLoadingKeys((prev) => new Set(prev).add(cacheKey));
 
-      let url = `/api/pdp-analysis?type=${type}&dimension=${dimension}`;
+      let url = `/api/pdp-analysis?type=${type}&dimension=${dimension}&db=${encodeURIComponent(db)}`;
       if (value) url += `&value=${encodeURIComponent(value)}`;
 
       try {

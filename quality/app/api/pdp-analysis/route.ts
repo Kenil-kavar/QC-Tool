@@ -3,10 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 const CH_URL = process.env.CLICKHOUSE_URL || "http://13.203.251.97:8123";
 const CH_USER = process.env.CLICKHOUSE_USER || "kenil_user";
 const CH_PASS = process.env.CLICKHOUSE_PASSWORD || "Kenil@Kavar0604";
-const CH_DB = process.env.CLICKHOUSE_DB || "boat";
+const CH_DB_DEFAULT = process.env.CLICKHOUSE_DB || "boat";
 
-async function queryClickHouse(sql: string) {
-  const url = `${CH_URL}/?user=${encodeURIComponent(CH_USER)}&password=${encodeURIComponent(CH_PASS)}&database=${encodeURIComponent(CH_DB)}`;
+async function queryClickHouse(sql: string, db?: string) {
+  const database = db || CH_DB_DEFAULT;
+  const url = `${CH_URL}/?user=${encodeURIComponent(CH_USER)}&password=${encodeURIComponent(CH_PASS)}&database=${encodeURIComponent(database)}`;
   const res = await fetch(url, {
     method: "POST",
     body: sql,
@@ -27,27 +28,43 @@ function parseTSV(raw: string): string[][] {
     .map((l) => l.split("\t"));
 }
 
-// GET /api/pdp-analysis?type=row_count|osa_remark|meta
+// GET /api/pdp-analysis?type=databases|row_count|osa_remark|meta&db=boat
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type") || "meta";
+    const db = searchParams.get("db") || CH_DB_DEFAULT;
+
+    // ── DATABASES: list all available databases ──
+    if (type === "databases") {
+      const raw = await queryClickHouse("SHOW DATABASES FORMAT TabSeparated", db);
+      const databases = parseTSV(raw)
+        .map((r) => r[0])
+        .filter((name) => !["system", "information_schema", "INFORMATION_SCHEMA", "default"].includes(name))
+        .sort();
+
+      return NextResponse.json({ databases, current: db });
+    }
 
     // ── META: return distinct dimension values + date range ──
     if (type === "meta") {
       const [platformsRaw, categoriesRaw, brandsRaw, datesRaw] =
         await Promise.all([
           queryClickHouse(
-            "SELECT DISTINCT platform_name FROM rb_pdp_week WHERE platform_name IS NOT NULL ORDER BY platform_name FORMAT TabSeparated"
+            "SELECT DISTINCT platform_name FROM rb_pdp_week WHERE platform_name IS NOT NULL ORDER BY platform_name FORMAT TabSeparated",
+            db
           ),
           queryClickHouse(
-            "SELECT DISTINCT brand_category_name FROM rb_pdp_week WHERE brand_category_name IS NOT NULL ORDER BY brand_category_name FORMAT TabSeparated"
+            "SELECT DISTINCT brand_category_name FROM rb_pdp_week WHERE brand_category_name IS NOT NULL ORDER BY brand_category_name FORMAT TabSeparated",
+            db
           ),
           queryClickHouse(
-            "SELECT DISTINCT brand_name FROM rb_pdp_week WHERE brand_name IS NOT NULL ORDER BY brand_name FORMAT TabSeparated"
+            "SELECT DISTINCT brand_name FROM rb_pdp_week WHERE brand_name IS NOT NULL ORDER BY brand_name FORMAT TabSeparated",
+            db
           ),
           queryClickHouse(
-            "SELECT DISTINCT toDate(pdp_crawl_date) AS d FROM rb_pdp_week ORDER BY d FORMAT TabSeparated"
+            "SELECT DISTINCT toDate(pdp_crawl_date) AS d FROM rb_pdp_week ORDER BY d FORMAT TabSeparated",
+            db
           ),
         ]);
 
@@ -61,11 +78,10 @@ export async function GET(req: NextRequest) {
 
     // ── ROW COUNT ──
     if (type === "row_count") {
-      const dimension = searchParams.get("dimension"); // platform | category | brand
-      const value = searchParams.get("value"); // optional: specific dimension value
+      const dimension = searchParams.get("dimension");
+      const value = searchParams.get("value");
 
       let whereClause = "1=1";
-      let groupByCol = "toDate(pdp_crawl_date)";
 
       if (dimension === "platform" && value) {
         whereClause = `platform_name = '${value}'`;
@@ -76,7 +92,7 @@ export async function GET(req: NextRequest) {
       }
 
       const sql = `SELECT toDate(pdp_crawl_date) AS date, count(*) AS cnt FROM rb_pdp_week WHERE ${whereClause} GROUP BY date ORDER BY date FORMAT TabSeparated`;
-      const raw = await queryClickHouse(sql);
+      const raw = await queryClickHouse(sql, db);
       const rows = parseTSV(raw);
 
       const counts: Record<string, number> = {};
@@ -103,7 +119,7 @@ export async function GET(req: NextRequest) {
       }
 
       const sql = `SELECT toDate(pdp_crawl_date) AS date, osa_remark, count(*) AS cnt FROM rb_pdp_week WHERE ${whereClause} AND osa_remark IS NOT NULL GROUP BY date, osa_remark ORDER BY date, osa_remark FORMAT TabSeparated`;
-      const raw = await queryClickHouse(sql);
+      const raw = await queryClickHouse(sql, db);
       const rows = parseTSV(raw);
 
       // Structure: { date: { remark: count } }
