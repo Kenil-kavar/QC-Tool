@@ -1,0 +1,584 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f3f4f6;
+  --foreground: #111827;
+  --card-bg: #ffffff;
+  --card-border: #d1d5db;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-light: #eff6ff;
+  --row-hover: #f9fafb;
+  --row-hover-accent: #f0f7ff;
+  --text-muted: #6b7280;
+  --text-secondary: #374151;
+
+  /* Grid & Borders */
+  --grid-color: #d1d5db;
+  --grid-light: #e5e7eb;
+  
+  /* Modern Slate Theme Header */
+  --th-bg: #0f172a;
+  --th-text: #f8fafc;
+  --th-border: #1e293b;
+
+  /* OSA Colors */
+  --instock-bg: #f0fdf4;
+  --instock-text: #166534;
+  --instock-border: #bbf7d0;
+  --instock-dot: #22c55e;
+
+  --oos-bg: #fef2f2;
+  --oos-text: #991b1b;
+  --oos-border: #fecaca;
+  --oos-dot: #ef4444;
+
+  --delisted-bg: #fff7ed;
+  --delisted-text: #9a3412;
+  --delisted-border: #fed7aa;
+  --delisted-dot: #f97316;
+
+  /* Shadows */
+  --shadow-premium: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03), 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-mulish);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-mulish), 'Mulish', 'Segoe UI', system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════
+   Page Container & Background Detail
+   ═══════════════════════════════════════════ */
+.page-container {
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(219, 234, 254, 0.5) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(243, 232, 255, 0.5) 0px, transparent 50%);
+  padding: 40px 48px;
+}
+
+.page-header {
+  max-width: 1720px;
+  margin: 0 auto 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--grid-color);
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
+}
+
+.page-description {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  margin: 0;
+  font-weight: 500;
+}
+
+.tables-container {
+  max-width: 1720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+/* ═══════════════════════════════════════════
+   Table Card
+   ═══════════════════════════════════════════ */
+.analysis-table-wrapper {
+  background: var(--card-bg);
+  border: 1px solid var(--grid-color);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow-premium);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.analysis-table-wrapper:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.table-header-bar {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--grid-color);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header-badge-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dot-indicator {
+  width: 8px;
+  height: 8px;
+  background-color: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.table-title {
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #111827;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.table-subtitle {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  margin: 0;
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════
+   Scroll & Layout Controls
+   ═══════════════════════════════════════════ */
+.table-scroll-container {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 580px;
+  position: relative;
+}
+
+.table-scroll-container::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.table-scroll-container::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 100px;
+}
+
+.table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ═══════════════════════════════════════════
+   Table Design — Grid Lines & Clean Cells
+   ═══════════════════════════════════════════ */
+.analysis-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  text-align: left;
+}
+
+.analysis-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+/* All Table Header & Body cells have border lines */
+.analysis-table th,
+.analysis-table td {
+  border: 1px solid var(--grid-color);
+}
+
+/* ═══════════════════════════════════════════
+   Double Table Header Row (Month & Days)
+   ═══════════════════════════════════════════ */
+.month-header-row {
+  background: var(--th-bg);
+}
+
+.month-header-row th {
+  color: var(--th-text);
+  font-weight: 800;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 10px 12px;
+  text-align: center;
+  border-color: var(--th-border);
+  user-select: none;
+}
+
+/* Dimension column header spans 2 rows */
+.dimension-header {
+  text-align: left !important;
+  min-width: 220px;
+  width: 220px;
+  background: var(--th-bg) !important;
+  border-color: var(--th-border) !important;
+  font-size: 10.5px !important;
+  letter-spacing: 0.08em !important;
+  z-index: 40;
+}
+
+/* Month Parent Headers */
+.month-header-cell {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.month-header-cell:hover {
+  background-color: #1e293b;
+}
+
+.month-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.calendar-icon {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.month-name-text {
+  font-weight: 800;
+}
+
+.month-toggle-arrow {
+  font-size: 8px;
+  color: #60a5fa;
+  margin-left: 2px;
+}
+
+/* Day Header (Second Row) */
+.day-header-row {
+  background: #1e293b;
+}
+
+.day-header-row th {
+  color: #cbd5e1;
+  font-weight: 700;
+  font-size: 10px;
+  padding: 7px 10px;
+  text-align: center;
+  border-color: #334155;
+  text-transform: uppercase;
+}
+
+.day-label-text {
+  color: #86efac; /* Subtle green for days */
+  letter-spacing: 0.02em;
+}
+
+.total-label-text {
+  color: #94a3b8;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+}
+
+/* ═══════════════════════════════════════════
+   Sticky First Column Configuration
+   ═══════════════════════════════════════════ */
+.sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 20;
+}
+
+/* ═══════════════════════════════════════════
+   Table Body Custom Rows
+   ═══════════════════════════════════════════ */
+.analysis-table tbody tr {
+  transition: background-color 0.1s ease;
+}
+
+.analysis-table tbody tr:hover {
+  background-color: var(--row-hover);
+}
+
+.analysis-table td {
+  padding: 8px 12px;
+  white-space: nowrap;
+  vertical-align: middle;
+  border-color: var(--grid-light);
+}
+
+/* header-row (Platform / Category / Brand totals) */
+.header-row {
+  background: #f9fafb;
+}
+
+.header-row:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.header-cell {
+  background: #f9fafb;
+  font-weight: 800;
+  color: #111827;
+  border-right: 2px solid var(--grid-color) !important;
+}
+
+.header-row:hover .header-cell {
+  background: #f3f4f6;
+}
+
+/* child-row (drilldown items like amazon, jbl, etc.) */
+.child-row {
+  background: #ffffff;
+  animation: slideDown 0.15s ease-out;
+}
+
+.child-row:nth-child(even) {
+  background: #fafafa;
+}
+
+.child-row:hover {
+  background-color: var(--row-hover-accent) !important;
+}
+
+.child-cell {
+  background: inherit;
+  color: var(--text-secondary);
+  border-right: 2px solid var(--grid-color) !important;
+  font-weight: 700;
+}
+
+.child-row:hover .child-cell {
+  background: var(--row-hover-accent);
+}
+
+/* ═══════════════════════════════════════════
+   Dimension Cell Contents
+   ═══════════════════════════════════════════ */
+.dimension-cell-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.row-chevron {
+  font-size: 8px;
+  color: var(--accent);
+  transition: transform 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+}
+
+.row-chevron.rotated {
+  transform: rotate(90deg);
+}
+
+.child-connector {
+  color: #cbd5e1;
+  font-family: monospace;
+  font-size: 11px;
+  margin-right: 2px;
+  user-select: none;
+}
+
+.dimension-name {
+  text-transform: uppercase;
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  font-weight: 800;
+  color: #1f2937;
+}
+
+.child-name {
+  text-transform: capitalize;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════
+   Data Columns & Value Formats
+   ═══════════════════════════════════════════ */
+.data-cell {
+  text-align: right;
+}
+
+.day-data-cell {
+  min-width: 120px;
+}
+
+.month-data-cell {
+  background: #fafbfd;
+  min-width: 130px;
+}
+
+.header-row .month-data-cell {
+  background: #f9fafb;
+}
+
+.count-value {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono), monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.month-total-val {
+  color: #111827;
+  font-weight: 800;
+}
+
+.cell-loading {
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+.cell-empty {
+  color: #d1d5db;
+}
+
+/* ═══════════════════════════════════════════
+   OSA Pills Grid
+   ═══════════════════════════════════════════ */
+.osa-badges-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-end;
+}
+
+.osa-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  height: 20px;
+}
+
+.osa-pill-indicator {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.osa-pill-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-right: 8px;
+  opacity: 0.9;
+}
+
+.osa-pill-count {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono), monospace;
+  font-weight: 700;
+}
+
+/* Instock Pill Colors */
+.osa-pill-instock {
+  background-color: var(--instock-bg);
+  color: var(--instock-text);
+  border-color: var(--instock-border);
+}
+.osa-pill-instock .osa-pill-indicator {
+  background-color: var(--instock-dot);
+}
+
+/* OOS Pill Colors */
+.osa-pill-oos {
+  background-color: var(--oos-bg);
+  color: var(--oos-text);
+  border-color: var(--oos-border);
+}
+.osa-pill-oos .osa-pill-indicator {
+  background-color: var(--oos-dot);
+}
+
+/* Delisted Pill Colors */
+.osa-pill-delisted {
+  background-color: var(--delisted-bg);
+  color: var(--delisted-text);
+  border-color: var(--delisted-border);
+}
+.osa-pill-delisted .osa-pill-indicator {
+  background-color: var(--delisted-dot);
+}
+
+/* ═══════════════════════════════════════════
+   Spinner & Loading Layout
+   ═══════════════════════════════════════════ */
+.table-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 60px 24px;
+  color: var(--text-muted);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e5e7eb;
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.table-error {
+  text-align: center;
+  padding: 48px;
+  color: var(--oos-dot);
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════
+   Animations
+   ═══════════════════════════════════════════ */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
