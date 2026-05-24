@@ -48,7 +48,7 @@ export async function GET(req: NextRequest) {
 
     // ── META: return distinct dimension values + date range ──
     if (type === "meta") {
-      const [platformsRaw, categoriesRaw, brandsRaw, datesRaw] =
+      const [platformsRaw, categoriesRaw, brandsRaw, locationsRaw, datesRaw] =
         await Promise.all([
           queryClickHouse(
             "SELECT DISTINCT platform_name FROM rb_pdp_week WHERE platform_name IS NOT NULL ORDER BY platform_name FORMAT TabSeparated",
@@ -63,6 +63,10 @@ export async function GET(req: NextRequest) {
             db
           ),
           queryClickHouse(
+            "SELECT DISTINCT location_name FROM rb_pdp_week WHERE location_name IS NOT NULL ORDER BY location_name FORMAT TabSeparated",
+            db
+          ),
+          queryClickHouse(
             "SELECT DISTINCT toDate(pdp_crawl_date) AS d FROM rb_pdp_week ORDER BY d FORMAT TabSeparated",
             db
           ),
@@ -72,6 +76,7 @@ export async function GET(req: NextRequest) {
         platforms: parseTSV(platformsRaw).map((r) => r[0]),
         categories: parseTSV(categoriesRaw).map((r) => r[0]),
         brands: parseTSV(brandsRaw).map((r) => r[0]),
+        locations: parseTSV(locationsRaw).map((r) => r[0]),
         dates: parseTSV(datesRaw).map((r) => r[0]),
       });
     }
@@ -89,6 +94,8 @@ export async function GET(req: NextRequest) {
         whereClause = `brand_category_name = '${value}'`;
       } else if (dimension === "brand" && value) {
         whereClause = `brand_name = '${value}'`;
+      } else if (dimension === "location" && value) {
+        whereClause = `location_name = '${value}'`;
       }
 
       const sql = `SELECT toDate(pdp_crawl_date) AS date, count(*) AS cnt FROM rb_pdp_week WHERE ${whereClause} GROUP BY date ORDER BY date FORMAT TabSeparated`;
@@ -116,6 +123,8 @@ export async function GET(req: NextRequest) {
         whereClause = `brand_category_name = '${value}'`;
       } else if (dimension === "brand" && value) {
         whereClause = `brand_name = '${value}'`;
+      } else if (dimension === "location" && value) {
+        whereClause = `location_name = '${value}'`;
       }
 
       const sql = `SELECT toDate(pdp_crawl_date) AS date, osa_remark, count(*) AS cnt FROM rb_pdp_week WHERE ${whereClause} AND osa_remark IS NOT NULL GROUP BY date, osa_remark ORDER BY date, osa_remark FORMAT TabSeparated`;

@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
 
     // ── META: return distinct dimension values + date range ──
     if (type === "meta") {
-      const [platformsRaw, keywordsRaw, pincodesRaw, datesRaw] =
+      const [platformsRaw, keywordsRaw, pincodesRaw, locationsRaw, datesRaw] =
         await Promise.all([
           queryClickHouse(
             "SELECT DISTINCT platform_name FROM rb_kw_week WHERE platform_name IS NOT NULL ORDER BY platform_name FORMAT TabSeparated",
@@ -52,6 +52,10 @@ export async function GET(req: NextRequest) {
             db
           ),
           queryClickHouse(
+            "SELECT DISTINCT location_name FROM rb_kw_week WHERE location_name IS NOT NULL ORDER BY location_name FORMAT TabSeparated",
+            db
+          ),
+          queryClickHouse(
             "SELECT DISTINCT toDate(created_on) AS d FROM rb_kw_week ORDER BY d FORMAT TabSeparated",
             db
           ),
@@ -61,6 +65,7 @@ export async function GET(req: NextRequest) {
         platforms: parseTSV(platformsRaw).map((r) => r[0]),
         keywords: parseTSV(keywordsRaw).map((r) => r[0]),
         pincodes: parseTSV(pincodesRaw).map((r) => r[0]),
+        locations: parseTSV(locationsRaw).map((r) => r[0]),
         dates: parseTSV(datesRaw).map((r) => r[0]),
       });
     }
@@ -68,7 +73,7 @@ export async function GET(req: NextRequest) {
     // ── DATA: aggregated metrics per date ──
     // Returns: { date: { count, max_rank, min_rank } }
     if (type === "data") {
-      const dimension = searchParams.get("dimension"); // platform | keyword | pincode
+      const dimension = searchParams.get("dimension"); // platform | keyword | pincode | location
       const value = searchParams.get("value"); // optional specific value
 
       let whereClause = "1=1";
@@ -79,6 +84,8 @@ export async function GET(req: NextRequest) {
         whereClause = `keyword = '${value}'`;
       } else if (dimension === "pincode" && value) {
         whereClause = `toString(pincode) = '${value}'`;
+      } else if (dimension === "location" && value) {
+        whereClause = `location_name = '${value}'`;
       }
 
       const sql = `

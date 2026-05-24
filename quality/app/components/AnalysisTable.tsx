@@ -9,6 +9,7 @@ interface Meta {
   platforms: string[];
   categories: string[];
   brands: string[];
+  locations: string[];
   dates: string[]; // "YYYY-MM-DD"
 }
 
@@ -29,7 +30,7 @@ interface OsaRemarkData {
 type TableType = "row_count" | "osa_remark";
 
 interface DimensionRow {
-  dimension: "platform" | "category" | "brand";
+  dimension: "platform" | "category" | "brand" | "location";
   label: string;
   value?: string; // if set, it's a drilldown child
   isHeader: boolean;
@@ -146,6 +147,7 @@ export default function AnalysisTable({ type, db }: { type: TableType; db: strin
     fetchData("platform");
     fetchData("category");
     fetchData("brand");
+    fetchData("location");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [meta]);
 
@@ -193,6 +195,19 @@ export default function AnalysisTable({ type, db }: { type: TableType; db: strin
       }
     }
 
+    // Location
+    result.push({ dimension: "location", label: "Location", isHeader: true });
+    if (expandedDimensions.has("location")) {
+      for (const l of meta.locations) {
+        result.push({
+          dimension: "location",
+          label: l,
+          value: l,
+          isHeader: false,
+        });
+      }
+    }
+
     return result;
   }, [meta, expandedDimensions]);
 
@@ -221,7 +236,9 @@ export default function AnalysisTable({ type, db }: { type: TableType; db: strin
               ? meta.platforms
               : dim === "category"
                 ? meta.categories
-                : meta.brands;
+                : dim === "brand"
+                  ? meta.brands
+                  : meta.locations;
           for (const v of values) {
             fetchData(dim, v);
           }
@@ -331,8 +348,8 @@ export default function AnalysisTable({ type, db }: { type: TableType; db: strin
 
   const tableSubtitle =
     type === "row_count"
-      ? "Row count totals by Platform, Category, and Brand"
-      : "OSA Remark counts (instock / oos / delisted) by dimension";
+      ? "Row count totals by Platform, Category, Brand, and Location"
+      : "OSA Remark counts (instock / oos / delisted) by Platform, Category, Brand, and Location";
 
   return (
     <div className="analysis-table-wrapper">

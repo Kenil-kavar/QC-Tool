@@ -9,6 +9,7 @@ interface KwMeta {
   platforms: string[];
   keywords: string[];
   pincodes: string[];
+  locations: string[];
   dates: string[]; // "YYYY-MM-DD"
 }
 
@@ -29,7 +30,7 @@ interface KwData {
 }
 
 interface DimensionRow {
-  dimension: "platform" | "keyword" | "pincode";
+  dimension: "platform" | "keyword" | "pincode" | "location";
   label: string;
   value?: string;
   isHeader: boolean;
@@ -141,6 +142,7 @@ export default function KwAnalysisTable({ db }: { db: string }) {
     fetchData("platform");
     fetchData("keyword");
     fetchData("pincode");
+    fetchData("location");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [meta]);
 
@@ -173,6 +175,14 @@ export default function KwAnalysisTable({ db }: { db: string }) {
       }
     }
 
+    // Location
+    result.push({ dimension: "location", label: "Location", isHeader: true });
+    if (expandedDimensions.has("location")) {
+      for (const l of meta.locations) {
+        result.push({ dimension: "location", label: l, value: l, isHeader: false });
+      }
+    }
+
     return result;
   }, [meta, expandedDimensions]);
 
@@ -200,7 +210,9 @@ export default function KwAnalysisTable({ db }: { db: string }) {
               ? meta.platforms
               : dim === "keyword"
                 ? meta.keywords
-                : meta.pincodes;
+                : dim === "pincode"
+                  ? meta.pincodes
+                  : meta.locations;
           for (const v of values) {
             fetchData(dim, v);
           }
@@ -265,7 +277,7 @@ export default function KwAnalysisTable({ db }: { db: string }) {
           <h2 className="table-title">Keyword Search Rank Analysis</h2>
         </div>
         <p className="table-subtitle">
-          Count, Max Rank & Min Rank from <strong>rb_kw_week</strong> by Platform, Keyword, and Pincode
+          Count, Max Rank & Min Rank from <strong>rb_kw_week</strong> by Platform, Keyword, Pincode, and Location
         </p>
       </div>
       <div className="table-scroll-container">
