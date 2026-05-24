@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import AnalysisTable from "./components/AnalysisTable";
+import KwAnalysisTable from "./components/KwAnalysisTable";
 
 export default function Home() {
   const [databases, setDatabases] = useState<string[]>([]);
@@ -31,11 +32,10 @@ export default function Home() {
     <div className="page-container">
       <div className="page-header">
         <div className="page-header-left">
-          <h1 className="page-title">PDP Week Analysis</h1>
+          <h1 className="page-title">PDP & Keyword Week Analysis</h1>
           <p className="page-description">
-            Comprehensive analysis of the <strong>rb_pdp_week</strong> table —
-            row counts and OSA remark distributions by Platform, Category, and
-            Brand with month → day drilldown.
+            Comprehensive analysis of the <strong>rb_pdp_week</strong> and <strong>rb_kw_week</strong> tables —
+            aggregating row counts, OSA remark distributions, and keyword search ranks (Count, Min & Max Rank) by dimension with drilldowns.
           </p>
         </div>
 
@@ -76,6 +76,7 @@ export default function Home() {
         <div className="tables-container" key={selectedDb}>
           <AnalysisTable type="row_count" db={selectedDb} />
           <AnalysisTable type="osa_remark" db={selectedDb} />
+          <KwAnalysisTable db={selectedDb} />
         </div>
       )}
     </div>
